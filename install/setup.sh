@@ -28,7 +28,7 @@ exec 3>&1
 unalias -a
 
 
-start_time=$(date +%s)
+start_time=$(date +%s%N)
 log "Started at $(date)"
 log "Dotfiles root is $DOTFILES_ROOT"
 
@@ -48,7 +48,6 @@ elif [ -f "/etc/issue" ]; then
 fi
 
 
-
 if ! regex_match "$OPERATING_SYSTEM" "OSX.*"; then
     FIND_EXCLUDE+=("'*/osx/*'")
 fi
@@ -65,4 +64,3 @@ pathadd "$HOME/bin"
 pathadd "./node_modules/.bin"
 pathadd "./vendor/bin"
 pathadd "./bin"
-

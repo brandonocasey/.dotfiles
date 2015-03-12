@@ -2,9 +2,9 @@
 
 if [ -d "$DOTFILES_ROOT/.svn" ]; then
     log "Async update for SVN"
-    async_command "svn up $DOTFILES_ROOT"
+    (svn up "$DOTFILES_ROOT" | log 2>/dev/null >/dev/null &)
 fi
 if [ -d "$DOTFILES_ROOT/.git" ]; then
     log "Async update for GIT"
-    async_command "(cd $DOTFILES_ROOT && git pull)"
+    (GIT_SSL_NO_VERIFY="0";git --git-dir=$DOTFILES_ROOT/.git --work-tree=$DOTFILES_ROOT pull | log 2>/dev/null 1>/dev/null &)
 fi

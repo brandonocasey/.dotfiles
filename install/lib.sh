@@ -51,7 +51,7 @@ pathadd() {
         return 1
     fi
 
-    local binary="$(echo "$1" | sed -e 's~/$~~')"
+    local binary="$1"
     if [ -z "$(echo "$PATH" | grep -E "(^|:)$binary(:|$)")" ]; then
         if [ "$PATH" == "" ]; then
             PATH="$binary"
@@ -206,7 +206,7 @@ get_config() {
 
 async_command() {
     log "Running Async command $1"
-    (eval "$1" 2>&1 | while read line; do echo "Async '$1' returned : $line"; done | log &)
+    $1 2>&1 | log &
 
 }
 

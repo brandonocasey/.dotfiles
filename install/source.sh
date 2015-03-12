@@ -30,7 +30,8 @@ if [ -f "$BASH_COMPLETION_LOCATION" ]; then
     if [ -n "$DEBUG_DOT" ]; then
         set +u
     fi
-    source "$BASH_COMPLETION_LOCATION"
+    source "$BASH_COMPLETION_LOCATION" &
+    disown
     log "Sourced $BASH_COMPLETION_LOCATION"
     if [ -n "$DEBUG_DOT" ]; then
         set -u

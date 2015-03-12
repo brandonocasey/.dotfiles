@@ -12,12 +12,6 @@ fi
 catch_error() {
     echo "Signal $1 in $2:$3"
 }
-if [ -n "$DEBUG_DOT" ]; then
-    set -u
-    set -e
-    trap 'catch_error Error $BASH_SOURCE $LINENO' ERR
-    trap 'catch_error Exit $BASH_SOURCE $LINENO' EXIT
-fi
 
 # Configure dotfiles Directories
 DOTFILES_ROOT=$HOME/.dotfiles
@@ -31,6 +25,7 @@ DOT_LOC=$DOTFILES_ROOT/dot
 VIMCONFIG=$DOTFILES_ROOT/dotfiles.cfg
 DOT_LOG_FILE=$DOT_TMP_ROOT/dotfiles.log
 
+function main() {
 source $DOT_INST_ROOT/lib.sh
 source $DOT_INST_ROOT/colors.sh
 source $DOT_INST_ROOT/setup.sh
@@ -39,22 +34,23 @@ source $DOT_INST_ROOT/setup.sh
 # 2) Async Update Update .dotfiles
 #==============================================================
 log_header 'Async Update'
-source $DOT_INST_ROOT/update.sh
+source $DOT_INST_ROOT/update.sh | log
 
 #==============================================================
 # 3) Git/SSH config setup
 #==============================================================
 log_header 'Configuration'
-source $DOT_INST_ROOT/configure.sh
+source $DOT_INST_ROOT/configure.sh | log
 
 
 #==============================================================
 # 4) Binary Installation
 #==============================================================
 log_header 'Installation'
-
 if [ "$(get_config 'do_install')" != "1" ]; then
+    echo "Repo"
     source $DOT_INST_ROOT/repos.sh
+    echo "Bin"
     source $DOT_INST_ROOT/binaries.sh
 fi
 
@@ -70,11 +66,19 @@ source $DOT_INST_ROOT/symlink.sh
 log_header 'Source'
 source $DOT_INST_ROOT/source.sh
 
+
 #==============================================================
 # 7) Cleanup
 #==============================================================
 log_header 'Cleanup'
 source $DOT_INST_ROOT/cleanup.sh
+}
+
+TIMEFORMAT=%R
+#time main
+main
+
+
 
 
 if [ -z "$DEBUG_DOT" ]; then
