@@ -1,0 +1,56 @@
+
+* ----------Setup---------- *
+Started at Wed Mar 11 20:48:24 EDT 2015
+Dotfiles root is /home/blondebeard/.dotfiles
+
+* ----------Async Update---------- *
+
+* ----------Configuration---------- *
+Asked to get the value of do_install and found 1
+Found That git has already been configured
+Asked to change do_ssh_config to 0
+Found that do_ssh_config is currently do_ssh_config="0"
+Old Config was:
+ 
+do_install="1"
+do_ssh_config="0"
+last_vim_update="1426120923"
+ 
+New Config is: 
+ 
+do_install="1"
+do_ssh_config="0"
+last_vim_update="1426120923"
+ 
+Compiling an ssh config
+/home/blondebeard/.ssh/config already exists as a symlink unlinking
+Linking /home/blondebeard/.dotfiles/tmp/ssh_config to /home/blondebeard/.ssh/config
+Found a file /home/blondebeard/.dotfiles/dist/ssh/user.sshc
+Found a file /home/blondebeard/.dotfiles/dist/ssh/hosts.sshc
+Found that /home/blondebeard/.ssh/config the config file points to /home/blondebeard/.dotfiles/tmp/ssh_config
+
+* ----------Installation---------- *
+Asked to get the value of do_install and found 1
+
+* ----------Symlink---------- *
+Started the symlink step
+Found file /home/blondebeard/.dotfiles/vimrc.syml
+that should go to /home/blondebeard/.vimrc
+/home/blondebeard/.vimrc already exists as a symlink unlinking
+Linking /home/blondebeard/.dotfiles/vimrc.syml to /home/blondebeard/.vimrc
+
+* ----------Source---------- *
+Sourcing Dist Files:
+
+/home/blondebeard/.dotfiles/dist/bash/history.bash
+/home/blondebeard/.dotfiles/dist/bash/misc.bash
+/home/blondebeard/.dotfiles/dist/bash/prompt.bash
+/home/blondebeard/.dotfiles/dist/bash/colors.bash
+/home/blondebeard/.dotfiles/dist/bash/function.bash
+/home/blondebeard/.dotfiles/dist/bash/alias.bash
+
+* ----------Cleanup---------- *
+/home/blondebeard/.bash_profile already exists as a symlink unlinking
+Linking /home/blondebeard/.dotfiles/dot to /home/blondebeard/.bash_profile
+All Done at Wed Mar 11 20:48:24 EDT 2015
+Overall dot took 0 seconds

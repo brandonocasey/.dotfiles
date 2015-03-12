@@ -1,0 +1,33 @@
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => File Fixes
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if has("autocmd")
+    " Color Log Files if you can
+    autocmd BufNewFile,BufReadPost *messages* :set filetype=messages
+    autocmd BufNewFile,BufReadPost *log* :set filetype=messages
+
+    " Treat text files like every other file when copy pasting into them
+    au BufRead,BufNewFile *.txt,*.tex set wrap linebreak nolist textwidth=0 wrapmargin=0
+
+    autocmd BufNewFile,BufRead *.bash set syntax=sh
+    autocmd BufNewFile,BufRead *.vimc set syntax=vim
+endif
+
+function! DetectSyntax()
+	if did_filetype()
+		let current_file_type = &filetype
+		" File types to ignore
+		if current_file_type !~ '[tads]'
+			return
+		endif
+	endif
+    if getline(1) =~ '^#!(/usr/bin/env\s\+bash|/bin/sh|/bin/bash)'
+        :set syntax=sh
+    elseif getline(1) =~ '^#!(/usr/bin/env\s\+perl|/usr/bin/perl)'
+        :set syntax=perl
+    endif
+endfunction
+
+autocmd BufNewFile,BufRead,BufWrite * call DetectSyntax()
+

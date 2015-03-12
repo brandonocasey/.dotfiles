@@ -1,0 +1,206 @@
+#! /usr/bin/env perl
+# zmv from zshell but for bash
+# zmv basically takes a glob src file and moves it to a destination
+#
+# Author Brandon Casey
+# Version 0.1
+# Modified On 2014-08-08 08:32
+# Created  2014-08-08 08:32
+#
+
+use strict;
+use warnings;
+# :config  no_auto_abbrev stops ambiguous names from being used
+use Getopt::Long qw(:config no_auto_abbrev);
+use File::Basename;
+use File::Copy qw(copy move);
+use File::Find;
+use File::Spec;
+use Data::Dumper;
+
+my $src  = shift;
+my $dest = shift;
+my $args = {};
+
+my $ret = GetOptions(
+    "i|case_insensitive" => \$args->{case_insensitive},
+    "f|force"            => \$args->{force},
+    "q|question"         => \$args->{question},
+    "d|dry-run"          => \$args->{dry_run},
+    "ln|symlink|l"       => \$args->{symlink},
+    "cp|copy|c"          => \$args->{copy},
+    "h|help"             => sub { usage() },
+);
+
+if(!$ret) {
+    ferror("Incorrect/Invalid options passed in were passed in");
+}
+
+if($args->{copy} and $args->{symlink}) {
+    ferror("Copy and symlink can not be used together");
+}
+
+if(!$src or !$dest) {
+    ferror("src and dest must be defined")
+}
+
+# 1) get full path/basename of src and dest
+
+my @directories;
+my $src_basename = basename($src);
+my $dest_basename = basename($dest);
+
+
+my $full_src  = File::Spec->rel2abs($src);
+my $full_dest = File::Spec->rel2abs($dest);
+
+print STDOUT "$full_src\n";
+# should search in any dir under /usr/, /bin/ for *.log
+
+my $src_top = $full_src;
+$src_top =~ s~\Q$src_basename~~;
+if($src =~ m/^\*\*/) {
+    push(@directories, '/');
+} elsif($src_top =~ m/\*\*/) {
+    #/usr/**/bin/**/(.*).log
+    my @tree = split(/\*\*/, $src_top);
+    my $dirs_above = 0;
+    while(@tree) {
+        my $dir = shift @tree;
+        if($dir eq '/') {
+            $dirs_above++;
+        } else {
+            push(@directories, $dir);
+            while($dirs_above > 0) {
+                push(@directories, $dir);
+                $dirs_above--;
+            }
+        }
+
+    }
+    print STDOUT Dumper(\@directories);
+
+} else {
+    push(@directories, $src_top);
+}
+exit;
+
+my $dest_top = $dest;
+$dest_top =~ s~\Q$dest_basename~~;
+
+my $files = [];
+# 1) Use Regex to grab source files, and replace with dest
+find(\&file_checker, @directories);
+sub file_checker {
+    my $file = {};
+    $file->{src} = $_;
+    # set the destination of our file to the basename of dest
+    $file->{dest} = $dest_basename;
+
+    # record a match if there is one
+    my $match;
+
+    my $index = 1;
+    # While there is a match we need to throw what matches in the file_dest
+    if($args->{case_insensitive}) {
+        while($file->{src} =~ /$src_basename/ig) {
+            $match = $1;
+            # For some reason we had to store $1 in a variable first ???
+            $file->{dest} =~ s/\$$index/$match/g;
+            $index++;
+        }
+    } else {
+        while($file->{src} =~ /$src_basename/g) {
+            $match = $1;
+            # For some reason we had to store $1 in a variable first ???
+            $file->{dest} =~ s/\$$index/$match/g;
+            $index++;
+        }
+    }
+
+    if($match) {
+        $file->{dest} = $dest_top . $file->{dest};
+        $file->{src} = $File::Find::name;
+        push(@{$files}, $file);
+    }
+}
+
+if(!@{$files}) {
+    ferror("No files found with the match $src");
+}
+
+# 3) move/copy/link/dry run them
+while(@{$files}) {
+    my $file = shift @{$files};
+
+    if($args->{question}) {
+        if(-e $file->{dest}) {
+            if(!ask("Destination $file->{dest} exists do you want to overwrite?")) {
+                next;
+            }
+        }
+    }
+    if($args->{copy}) {
+        copy($file->{src}, $file->{dest});
+    } elsif($args->{symlink}) {
+        symlink($file->{src}, $file->{dest});
+    } elsif($args->{dry_run}) {
+        info("Would have moved/linked/copied from:");
+        info("$file->{src}");
+        info("to $file->{dest}");
+    } else {
+        move($file->{src}, $file->{dest});
+    }
+}
+
+
+sub info {
+    _print(\@_);
+}
+
+sub ask {
+    my $answer = "";
+    while($answer ne 'y' and $answer ne 'n') {
+        _print(\@_, '', ' [y/n]');
+        $answer = <STDIN>;
+        chomp($answer);
+    }
+    if($answer eq 'y') {
+        return 0;
+    }
+    return 1;
+}
+
+sub _print {
+    my $args    = shift;
+    my $prefix  = shift || "";
+    my $suffix  =  shift || "";
+    while(@{$args}) {
+        my $msg = shift @{$args};
+        print STDOUT $prefix . $msg . $suffix ."\n";
+    }
+}
+
+sub ferror {
+    _print(\@_, "ERROR: ", " --help for help");
+    exit 1;
+}
+sub usage {
+    my $script_name = basename($0);
+    info("    ./$script_name '<src>' '<dest>' <options>");
+    info("");
+    info("    Example of a recursive copy upwards to a destination");
+    info("    ./$script_name '**/(.*).log' 'dest/\$1.backup.log'");
+    info("");
+    info("    -i --case_insensitive   case insensitive search for src");
+    info("    -f --force              force the copy/move to happen");
+    info("    -q --ask                ask before overwriting files");
+    info("    -l -ln  --symlink       symlink instead of moving");
+    info("    -c  -cp --copy          copy instead of moving");
+    info("    -d --dry-run            mock/print what would happen should the command run");
+    info("    -h --help               show this help");
+    info("");
+    exit;
+}
+
+

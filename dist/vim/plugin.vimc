@@ -1,0 +1,149 @@
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => Plugins
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" be iMproved, required
+set nocompatible
+
+" required
+filetype off
+filetype plugin indent on
+
+" TODO: FIX BASH scrollback issues that this caused
+" If we have git installed (in the PATH)
+if executable("git") && !filereadable(expand('~/.vim/.novundle'))
+    function! UpdatePlugins()
+
+        :silent PluginClean!
+        :silent PluginInstall!
+        :call SetConfigValue('last_vim_update', strftime("%s"))
+        :silent !clear
+        :q
+    endfunction
+
+    function! ShouldUpdate()
+		let last_update = GetConfigValue('last_vim_update')
+        if last_update == ""
+            return 1
+        endif
+
+        " Grab todays date in seconds
+        let today = strftime("%s")
+
+        " We are checking to see if today -  last_update greater than 14 days
+        " in seconds, if so we update
+        if (today - last_update) > (14*24*60*60)
+            return 1
+        endif
+
+        return 0
+    endfunction
+
+    command! UpdatePlugins :call UpdatePlugins()
+
+
+
+    let vundle_just_installed=0
+    let vundle_readme=expand('~/.vim/bundle/vundle/README.md')
+    if !filereadable(vundle_readme)
+        echo "Installing Vundle.."
+        echo ""
+        silent !mkdir -p ~/.vim/bundle
+        silent !git clone https://github.com/gmarik/vundle ~/.vim/bundle/vundle
+        let vundle_just_installed=1
+    endif
+
+    " Use Vundle
+    set rtp+=~/.vim/bundle/vundle/
+    call vundle#rc()
+
+    " Let Vundle manage Vundle
+    Plugin 'gmarik/vundle'
+
+    " Better tab completion
+    Plugin 'ervandew/supertab'
+
+    " Easy HTML work
+    Plugin 'mattn/emmet-vim'
+
+    " Better directory tree when viming a dir
+    Plugin 'scrooloose/nerdtree'
+
+    " Syntax checking
+    Plugin 'scrooloose/syntastic'
+
+    " hit control-n to add another cursor on a similar line
+    Plugin 'kristijanhusak/vim-multiple-cursors'
+
+    " Stop Control-F etc from disorienting you and losing your place
+    Plugin 'terryma/vim-smooth-scroll'
+
+    " Add tons of colorschemes
+    Plugin 'flazz/vim-colorschemes'
+
+    " When opening a new file with a code extension it will be started for you
+    Plugin 'aperezdc/vim-template'
+
+    " Indent Guidelines
+    Plugin 'nathanaelkane/vim-indent-guides'
+
+    " Auto complete (, ", ' with their partner and put you in the center of
+    " them to type
+    Plugin 'Raimondi/delimitMate'
+
+    " example \"Hello World!\"
+    " cs"' will change this to 'Hello World!'
+    " cs"<q> will change to <q>Hello World!</q>
+    Plugin 'tpope/vim-surround'
+
+    " <leader>c leader being , will toggle comments
+    " comment out stuff
+    Plugin 'scrooloose/nerdcommenter'
+
+    " Align = Signs
+    Plugin 'godlygeek/tabular'
+
+    " Force Correct Indentation, and auto switch when needed
+    Plugin 'brandonocasey/vim-sleuth'
+
+    " Stylus Syntax
+    Plugin 'wavded/vim-stylus'
+
+    " We always want indent guides
+    let g:indent_guides_enable_on_vim_startup=1
+
+    " Nerdtree show me hidden stuff
+    let NERDTreeShowHidden=1
+
+    " No I dont want crazy default indent guide colors
+    let g:indent_guides_auto_colors = 0
+
+    " Check perl syntax
+    let g:syntastic_enable_perl_checker = 1
+
+	let g:SleuthDefaultWidth = 4
+
+    " Smart indenting for delimate
+    " let g:delimitMate_expand_cr = 2
+    let g:delimitMate_expand_space = 1
+
+    " Match from the top
+    let g:SuperTabDefaultCompletionType = "<c-n>"
+
+	let g:multi_cursor_normal_maps = {'d':1, 'y':1, 'p':1}
+
+    " Indent guidelines color
+    autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=black ctermbg=233
+    autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=darkgrey ctermbg=234
+
+    if ShouldUpdate () == 1 || vundle_just_installed == 1
+        call UpdatePlugins()
+    endif
+
+    " Coloring + stop errors without Vundle
+    let vim_colorschemes=expand('~/.vim/bundle/vim-colorschemes/README.md')
+    if filereadable(vim_colorschemes)
+        colorscheme molokai
+    endif
+
+endif
+

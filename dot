@@ -1,0 +1,85 @@
+#! /bin/sh
+#==============================================================
+# 1) Setup Configuration Variables and export them
+#==============================================================
+
+# Make sure we are being sourced
+if [ $_ == $0 ]; then
+    echo "Script should be sourced, not run as an executable!"
+    exit;
+fi
+
+catch_error() {
+    echo "Signal $1 in $2:$3"
+}
+if [ -n "$DEBUG_DOT" ]; then
+    set -u
+    set -e
+    trap 'catch_error Error $BASH_SOURCE $LINENO' ERR
+    trap 'catch_error Exit $BASH_SOURCE $LINENO' EXIT
+fi
+
+# Configure dotfiles Directories
+DOTFILES_ROOT=$HOME/.dotfiles
+DOT_CONFIG_FILE=$DOTFILES_ROOT/dotfiles.cfg
+DOT_DIST_ROOT=$DOTFILES_ROOT/dist
+DOT_CUST_ROOT=$DOTFILES_ROOT/custom
+DOT_INST_ROOT=$DOTFILES_ROOT/install
+DOT_BACK_ROOT=$DOTFILES_ROOT/backup
+DOT_TMP_ROOT=$DOTFILES_ROOT/tmp
+DOT_LOC=$DOTFILES_ROOT/dot
+VIMCONFIG=$DOTFILES_ROOT/dotfiles.cfg
+DOT_LOG_FILE=$DOT_TMP_ROOT/dotfiles.log
+
+source $DOT_INST_ROOT/lib.sh
+source $DOT_INST_ROOT/colors.sh
+source $DOT_INST_ROOT/setup.sh
+
+#==============================================================
+# 2) Async Update Update .dotfiles
+#==============================================================
+log_header 'Async Update'
+source $DOT_INST_ROOT/update.sh
+
+#==============================================================
+# 3) Git/SSH config setup
+#==============================================================
+log_header 'Configuration'
+source $DOT_INST_ROOT/configure.sh
+
+
+#==============================================================
+# 4) Binary Installation
+#==============================================================
+log_header 'Installation'
+
+if [ "$(get_config 'do_install')" != "1" ]; then
+    source $DOT_INST_ROOT/repos.sh
+    source $DOT_INST_ROOT/binaries.sh
+fi
+
+#==============================================================
+# 5) Place all .symlink files into the correct location
+#==============================================================
+log_header 'Symlink'
+source $DOT_INST_ROOT/symlink.sh
+
+#==============================================================
+# 6) Source Bash files into our environment
+#==============================================================
+log_header 'Source'
+source $DOT_INST_ROOT/source.sh
+
+#==============================================================
+# 7) Cleanup
+#==============================================================
+log_header 'Cleanup'
+source $DOT_INST_ROOT/cleanup.sh
+
+
+if [ -z "$DEBUG_DOT" ]; then
+    set +u
+    set +e
+    trap -- > /dev/null
+fi
+

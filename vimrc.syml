@@ -1,0 +1,63 @@
+" Created by: Brandon Casey
+"
+" TODO: Better spell checking
+" TODO: Fix tab completion, default should not be 8 char tabs
+" TODO: Better indent guide plugin
+" TODO: Better formatting more functions
+" TODO: Fix vimrc save, indent bug
+" TODO: Can we load syntax of a file with shebang, without saving?
+"
+"
+if empty(glob(expand('~/.dotfiles/dotfiles.cfg')))
+    call system("touch", expand('~/.dotfiles/dotfiles.cfg'))
+endif
+
+function! GetConfigValue(name)
+    if !filereadable(expand('~/.dotfiles/dotfiles.cfg'))
+	return ""
+    endif
+
+    " Read Config
+    let file = readfile(expand('~/.dotfiles/dotfiles.cfg'))
+
+    " Check what the value of a:name is in that config
+    for line in file
+	let check = matchstr(line, a:name . '="\zs.*\ze"')
+	if !empty(check)
+		return check
+	endif
+    endfor
+
+    return ""
+endfunction
+
+function! SetConfigValue(name, value)
+    if !filewritable(expand('~/.dotfiles/dotfiles.cfg'))
+	return ""
+    endif
+    let file = readfile(expand('~/.dotfiles/dotfiles.cfg'))
+    let old_config_value = GetConfigValue(a:name)
+    if old_config_value == ""
+	let file = file + [a:name . '="' . a:value .'"']
+    else
+	let i = 0
+	for line in file
+	    let check = matchstr(line, a:name . '="' . old_config_value  .  '"')
+	    if !empty(check)
+		let file[i] = a:name . '="' . a:value .'"'
+	    endif
+	    let i = i + 1
+	endfor
+    endif
+
+    call writefile(file, expand('~/.dotfiles/dotfiles.cfg'))
+endfunction
+
+"au BufWritePost {.vimrc,*.vimconfig,vimrc.symlink} so ~/.vimrc
+" Source in all other files
+for FILE in split(system('find ~/.dotfiles ! -type l -name *.vimc', '\n'))
+    exe 'source' FILE
+endfor
+
+
+
