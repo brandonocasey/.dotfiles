@@ -34,13 +34,13 @@ source $DOT_INST_ROOT/setup.sh
 # 2) Async Update Update .dotfiles
 #==============================================================
 log_header 'Async Update'
-source $DOT_INST_ROOT/update.sh | log
+source $DOT_INST_ROOT/update.sh
 
 #==============================================================
 # 3) Git/SSH config setup
 #==============================================================
 log_header 'Configuration'
-source $DOT_INST_ROOT/configure.sh | log
+source $DOT_INST_ROOT/configure.sh
 
 
 #==============================================================
@@ -75,8 +75,11 @@ source $DOT_INST_ROOT/cleanup.sh
 }
 
 TIMEFORMAT=%R
-#time main
-main
+if [ -n "$DEBUG_DOT" ]; then
+    time main
+else
+    main
+fi
 
 
 
