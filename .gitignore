@@ -1,3 +1,4 @@
 tmp/*
 !tmp/.gitkeep
 dist/svn/subversion.syml/auth/
+dist/git/gituser.syml
