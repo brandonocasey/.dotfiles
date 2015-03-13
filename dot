@@ -13,6 +13,13 @@ catch_error() {
     echo "Signal $1 in $2:$3"
 }
 
+if [ -n "$DEBUG_DOT" ]; then
+    set -u
+    set -e
+    trap 'catch_error Error $BASH_SOURCE $LINENO' ERR
+    trap 'catch_error Exit $BASH_SOURCE $LINENO' EXIT
+fi
+
 # Configure dotfiles Directories
 DOTFILES_ROOT=$HOME/.dotfiles
 DOT_CONFIG_FILE=$DOTFILES_ROOT/dotfiles.cfg
