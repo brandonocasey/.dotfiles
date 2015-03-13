@@ -29,3 +29,5 @@
 [include]
     path = .gituser
     path = .gitpush
+[push]
+	default = simple
