@@ -52,7 +52,6 @@ if tput setaf 1 &> /dev/null; then
     fi
     BOLD=$(tput bold)
     RESET=$(tput sgr0)
-    DIM=$(tput dim)
 else
     RED='\e[0;31m'
     ORANGE='\033[1;33m'

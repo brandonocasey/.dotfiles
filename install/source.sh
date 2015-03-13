@@ -18,7 +18,7 @@ for file in `find_this '*.bash'`; do
 done
 
 
-if [ -z "$BASH_COMPLETION_LOCATION" ]; then
+if [ -z "${BASH_COMPLETION_LOCATION:-}" ]; then
     if [ -f "/etc/bash_completion" ]; then
         BASH_COMPLETION_LOCATION="/etc/bash_completion"
     elif [ -f "/usr/local/etc/bash_completion" ]; then
@@ -26,7 +26,7 @@ if [ -z "$BASH_COMPLETION_LOCATION" ]; then
     fi
 fi
 
-if [ -f "$BASH_COMPLETION_LOCATION" ]; then
+if [ -f "${BASH_COMPLETION_LOCATION:-}" ]; then
     if [ -n "$DEBUG_DOT" ]; then
         set +u
     fi

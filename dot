@@ -9,16 +9,30 @@ if [ $_ == $0 ]; then
     exit;
 fi
 
-catch_error() {
-    echo "Signal $1 in $2:$3"
+trap_error() {
+    local message="${1:-}"; shift
+    local code="${1:-1}"; shift
+
+    if [ -z "$message" ]; then
+        message=""
+    fi
+    echo "Error on or near line ${parent_lineno}: ${message}; exiting with status ${code}"
 }
 
+
 if [ -n "$DEBUG_DOT" ]; then
-    set -u
-    set -e
+    # trace ERR through pipes
+    set -o pipefail
+    # trace ERR through 'time command' and other functions
+    set -o errtrace
+    ## set -u : exit the script if you try to use an uninitialised variable
+    set -o nounset
+    ## set -e : exit the script if any statement returns a non-true return value
+    set -o errexit
+    # run in posix mode
     set -o posix
-    trap 'catch_error Error $BASH_SOURCE $LINENO' ERR
-    trap 'catch_error Exit $BASH_SOURCE $LINENO' EXIT
+
+    trap -- 'trap_error ${LINENO}' SIGTERM SIGINT SIGHUP SIGQUIT EXIT ERR
 fi
 
 # Configure dotfiles Directories
@@ -89,13 +103,18 @@ else
     main
 fi
 
+if [ -z "${DEBUG_DOT:-}" ]; then
+    # trace ERR through pipes
+    set -o pipefail
+    # trace ERR through 'time command' and other functions
+    set -o errtrace
+    ## set -u : exit the script if you try to use an uninitialised variable
+    set -o nounset
+    ## set -e : exit the script if any statement returns a non-true return value
+    set -o errexit
+    # run in posix mode
+    set -o posix
 
-
-
-if [ -z "$DEBUG_DOT" ]; then
-    set +u
-    set +e
-    set +o posix
-    trap -- > /dev/null
+    trap -- >/dev/null
 fi
 
