@@ -103,7 +103,7 @@ else
     main
 fi
 
-if [ -z "${DEBUG_DOT:-}" ]; then
+if [ -n "$DEBUG_DOT" ]; then
     # trace ERR through pipes
     set -o pipefail
     # trace ERR through 'time command' and other functions
