@@ -16,6 +16,7 @@ catch_error() {
 if [ -n "$DEBUG_DOT" ]; then
     set -u
     set -e
+    set -o posix
     trap 'catch_error Error $BASH_SOURCE $LINENO' ERR
     trap 'catch_error Exit $BASH_SOURCE $LINENO' EXIT
 fi
@@ -33,52 +34,52 @@ VIMCONFIG=$DOTFILES_ROOT/dotfiles.cfg
 DOT_LOG_FILE=$DOT_TMP_ROOT/dotfiles.log
 
 function main() {
-source $DOT_INST_ROOT/lib.sh
-source $DOT_INST_ROOT/colors.sh
-source $DOT_INST_ROOT/setup.sh
+    source $DOT_INST_ROOT/lib.sh
+    source $DOT_INST_ROOT/colors.sh
+    source $DOT_INST_ROOT/setup.sh
 
-#==============================================================
-# 2) Async Update Update .dotfiles
-#==============================================================
-log_header 'Async Update'
-source $DOT_INST_ROOT/update.sh
+    #==============================================================
+    # 2) Async Update Update .dotfiles
+    #==============================================================
+    log_header 'Async Update'
+    source $DOT_INST_ROOT/update.sh
 
-#==============================================================
-# 3) Git/SSH config setup
-#==============================================================
-log_header 'Configuration'
-source $DOT_INST_ROOT/configure.sh
-
-
-#==============================================================
-# 4) Binary Installation
-#==============================================================
-log_header 'Installation'
-if [ "$(get_config 'do_install')" != "1" ]; then
-    echo "Repo"
-    source $DOT_INST_ROOT/repos.sh
-    echo "Bin"
-    source $DOT_INST_ROOT/binaries.sh
-fi
-
-#==============================================================
-# 5) Place all .symlink files into the correct location
-#==============================================================
-log_header 'Symlink'
-source $DOT_INST_ROOT/symlink.sh
-
-#==============================================================
-# 6) Source Bash files into our environment
-#==============================================================
-log_header 'Source'
-source $DOT_INST_ROOT/source.sh
+    #==============================================================
+    # 3) Git/SSH config setup
+    #==============================================================
+    log_header 'Configuration'
+    source $DOT_INST_ROOT/configure.sh
 
 
-#==============================================================
-# 7) Cleanup
-#==============================================================
-log_header 'Cleanup'
-source $DOT_INST_ROOT/cleanup.sh
+    #==============================================================
+    # 4) Binary Installation
+    #==============================================================
+    log_header 'Installation'
+    if [ "$(get_config 'do_install')" != "1" ]; then
+        echo "Repo"
+        source $DOT_INST_ROOT/repos.sh
+        echo "Bin"
+        source $DOT_INST_ROOT/binaries.sh
+    fi
+
+    #==============================================================
+    # 5) Place all .symlink files into the correct location
+    #==============================================================
+    log_header 'Symlink'
+    source $DOT_INST_ROOT/symlink.sh
+
+    #==============================================================
+    # 6) Source Bash files into our environment
+    #==============================================================
+    log_header 'Source'
+    source $DOT_INST_ROOT/source.sh
+
+
+    #==============================================================
+    # 7) Cleanup
+    #==============================================================
+    log_header 'Cleanup'
+    source $DOT_INST_ROOT/cleanup.sh
 }
 
 TIMEFORMAT=%R
@@ -94,6 +95,7 @@ fi
 if [ -z "$DEBUG_DOT" ]; then
     set +u
     set +e
+    set +o posix
     trap -- > /dev/null
 fi
 
